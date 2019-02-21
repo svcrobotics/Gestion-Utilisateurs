@@ -4,7 +4,7 @@
 
 Dans le cadre de la gestion utilisateurs, un administrateur peut recevoir quotidiennement un fichier CSV (export d'un tableur MS Excel par exemple) contenant la liste des utilisateurs qui doivent exister sur un serveur.
 
-Ce fichier, appelé *personnages.csv*, pourrait alors avoir le contenu suivant :
+Ce fichier, appelé *data.csv*, pourrait alors avoir le contenu suivant :
 
 | Prénom    | Nom         | Mot de passe | Lieu         |
 | --------- | ----------- | ------------ | ------------ |
@@ -46,4 +46,4 @@ Dans ce cadre:
 
 ## Solution
 
-Le script *user.py* que vous retrouverez dans mon dépôt [github](https://github.com/svcrobotics/Gestion-Utilisateurs/user.py) effectue automatiquement toutes ces opérations.
+Le script *user.py* que vous retrouverez dans mon dépôt [github](https://github.com/svcrobotics/Gestion-Utilisateurs/blob/master/user.py) effectue automatiquement toutes ces opérations.
