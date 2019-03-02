@@ -56,7 +56,7 @@ def start():
         print("Le chemin du fichier .csv est incorrect ou l'extension de celui-ci n'est pas .csv!")
         sys.exit(0)
 
-
+#######################################################################################
 # La liste des données est lue ligne par ligne, la ligne 
 # d'en-tête est supprimée:
 
@@ -89,9 +89,11 @@ def lire_lignes():
         chercher_user(user)
         modifier_user(user, user_path, path_csv)
         creer_user(user, password, groupe)
+        groupe_special(user, groupe)
         ####################"""
         i = i + 1
     f.close()
+
 #################################################
 
 def formatage(valeur):
@@ -111,12 +113,18 @@ def formatage(valeur):
 # et en dernier lieu le détruire de son groupe
 
 def archiver_user(user):
+
     date = datetime.datetime.now().strftime("%d-%m-%y")
-    os.system("tar czvf " + user + ".tar.gz " + path3)
-    os.system("mv " + path3 + " /archives/" + user + "-" + date + ".tar.gz")
-    #os.system("rm -R " + path3)
+    os.system("tar czvf " + user + ".tar.gz " + path_csv)
+    os.system("mv " + path_csv + " /archives/" + user + "-" + date + ".tar.gz")
+
+###################################################################"""
+
+def desarchiver_user(user):
+    pass
 
 #################################################################""""
+
 def chercher_user(user):
     global user_exist
     f = open("/etc/passwd", "r")
@@ -140,16 +148,25 @@ def chercher_user(user):
         
         i = i + 1
     f.close()
+
+##############################################################################
+
+def groupe_special(user, groupe):
+    if user_exist and groupe == "-":
+        archiver_user(user)
 ######################################################################################
+
 def creer_user(user, password, groupe):
     # Le répertoire squelette (/etc/skel/) contient les fichiers et 
     # répertoires qui seront copiés dans le répertoire 
     # personnel de l’utilisateur au moment de sa création.
     
-    if not user_exist:
+    if not user_exist and groupe != "-":
         os.system("useradd -d /home/" + groupe + "/" + user + " -g " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
         os.system("passwd -e " + user)
+
 ###################################################################################
+
 def modifier_user(user, user_path, path_csv):
     global path_init
     global new_path
@@ -164,17 +181,19 @@ def modifier_user(user, user_path, path_csv):
         except FileExistsError:
             deplacer_user(path_init, path)
             os.system("usermod -d " + new_path + " " + user)
+            
 ######################################################""
 
 def supprimer_user(user):
     os.system("userdel -r -f " + user)
-#################################################################""
+
+#################################################################
+
 def deplacer_user(path_init, path):
-    if path_init != new_path and groupe != "-":
+    if path_init != new_path:
         os.system("mv " + path_init + " " + path)
 
 ########################################################################
-#####################################################################
 
 def lire_groupe(groupe):
     # Verifier le path du groupe
@@ -185,7 +204,8 @@ def lire_groupe(groupe):
         global path_du_groupe
         path_du_groupe = True
     else:
-        print("Le path du groupe:", groupe, "n'existe pas!")
+        #print("Le path du groupe:", groupe, "n'existe pas!")
+        path_du_groupe = False
 
     # Verifier /etc/group
     f = open("/etc/group", "r")
@@ -225,12 +245,15 @@ def creer_path_groupe(groupe):
 def supprimer_path_groupe(groupe):
     os.system("rm /home/" + groupe)
 
+#############################################""
+
 def supprimer_groupe(groupe):
     os.system("groupdel " + groupe)
 
 ##########################################:
 
 if __name__ == '__main__':
+    
     print("####################################################")
     start()
     print("####################################################")
