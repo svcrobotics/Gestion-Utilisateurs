@@ -6,7 +6,7 @@ Dans le cadre de la gestion utilisateurs, un administrateur peut recevoir quotid
 
 Ce fichier, appelé *data.csv*, pourrait alors avoir le contenu suivant :
 
-| Prénom    | Nom         | Mot de passe | Lieu         |
+| Prénom    | Nom         | Mot de passe | Goupe        |
 | --------- | ----------- | ------------ | ------------ |
 | Suzanne   | Sto Hélit   | bigadin      | Quirm        |
 | Esméralda | Ciredutemps | gytha        | Lancre       |
@@ -19,7 +19,7 @@ Le mot de passe correspond au mot de passe original de l'utilisateur (celui-ci d
 La tache quotidienne de cet administrateur est alors multiple:
 
 - Il doit ajouter les utilisateurs de la liste qui ne sont pas sur le système.
-- Il doit modifier le lieu auquel les utilisateurs sont rattachés s'ils sont déplacés.
+- Il doit modifier le groupe auquel les utilisateurs sont rattachés s'ils sont déplacés.
 - Il ne doit **pas** modifier le mot de passe des utilisateurs existants.
 - Il doit supprimer les utilisateurs qui ne doivent plus exister.
 - Il doit archiver les fichiers de ces utilisateurs.

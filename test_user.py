@@ -11,6 +11,7 @@ import os
 from os.path import basename
 import sys
 import datetime
+import unicodedata
 
 ##################################
 # Définition locale de fonctions #
@@ -94,35 +95,30 @@ def lire_lignes():
         prenom = formatage(tab[0]).strip('\t\t')
         # La variable groupe sera utiliser par la suite dans d'autre fonctions
         # Nous avons donc rendu sa portée globale
+        
         groupe = formatage(tab[3]).strip('\t\t')
-        #lieu = formatage(tab[4]).strip('\t\t')
+        lieu = formatage(tab[4]).strip('\t\t')
+        
         user = nom + "_" + prenom
+        
         path_csv = "/home/" + groupe + "/" + user
+        
         path = "/home/" + groupe + "/"
         ############################""
         # On cherche a repondre a la question /home/<groupe> exist? et 
         # groupe est dans /etc/group ? 
         lire_groupe(groupe)
-        #print(groupe_exist, path_du_groupe_exist)
         # On creer le groupe s'il n'existe pas
-        creer_groupe(groupe_exist, path_du_groupe_exist)
+        creer_groupe(groupe)
         # On creer /home/<groupe>/ si le path n'existe pas
-        #creer_path_groupe(groupe)
+        creer_path_groupe(groupe)
         # Permet de savoir si un utilisateur existe ou non
-        #os.system("cat /etc/group")
-        #print("les groupes ont bien été crées dans /etc/group.")
-        #os.system("ls /home/*")
-        #print("Le path pour les groupes a bien été crée dans /home/<groupe>.")
         chercher_user(user)
-        #print(user_exist, user_path)
-        # Si l'utilisateur n'existe pas il faut le crée
-        creer_user(user_exist, user, password, groupe)
-        #print(user_exist, user_path)
-        #creer_path_user(user_exist)
-        #os.system("cat /etc/passwd")
-        #print("L'utilisateur et son path ont bien été crées dans /etc/passwd.")
+        print(user_exist)
+        creer_user(user, password, groupe)
+        
         modifier_user(user)
-        #groupe_special(user, groupe)
+        groupe_special(user, groupe)
         ####################"""
         i = i + 1
     f.close()
@@ -134,10 +130,12 @@ def formatage(valeur):
     La fonction formatage() est chargée d'enlever les accents, les espaces de transformer la
     chaîne de caractères en minuscules d'enlever les retour chariot en fin de ligne et d'eliminer les tabulations. 
     '''
-
-    val = valeur.lower().replace("é", "e").replace(".", "").replace(" ", "").replace("è", "e").strip('\t\t').rstrip('\n\r')
+    
+    val = valeur.lower().replace("è", "e").replace("é", "e").replace(".", "").replace(" ", "").replace("è", "e").strip('\t\t').rstrip('\n\r')
     return val
 
+def test_formatage():
+    assert formatage(" Auré . liè   ") == "aurelie"
 ###########################################################
 
 def archiver_user(user):
@@ -173,8 +171,8 @@ def chercher_user(user):
     for line in f.readlines():
         tab = line.split(':')
         c_user = tab[0]
-        #uid = tab[2]
-        #gid = tab[3]
+        uid = tab[2]
+        gid = tab[3]
 
         if c_user != user:
             user_path = ""
@@ -188,8 +186,19 @@ def chercher_user(user):
         
         i = i + 1
     f.close()
-    return user_exist, user_path
+    return user_exist
 
+def test_chercher_user_existant():
+    assert chercher_user("jmtlg_planteur") == True
+
+def test_chercher_user_path_existant():
+    assert user_path == "/home/system/jmtlg_planteur"
+
+def test_chercher_user_absent():
+    assert chercher_user("toto2018") == False
+
+def test_chercher_user_path_absent():
+    assert user_path == ""
 ##############################################################################
 
 def groupe_special(user, groupe):
@@ -200,7 +209,7 @@ def groupe_special(user, groupe):
         supprimer_user(user)
 ######################################################################################
 
-def creer_user(user_exist, user, password, groupe):
+def creer_user(user, password, groupe):
     '''
     La fonction creer_user() permet de creer un utilisateur s'il n'existe pas 
     dans /etc/passwd.
@@ -209,17 +218,10 @@ def creer_user(user_exist, user, password, groupe):
     # répertoires qui seront copiés dans le répertoire 
     # personnel de l’utilisateur au moment de sa création.
     
-    if user_exist == False and groupe != "-":
+    if not user_exist and groupe != "-":
         os.system("useradd -d /home/" + groupe + "/" + user + " -g " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
         os.system("passwd -e " + user)
-        user_exist = True
-        creer_path_user(user_exist)
 
-    return user_exist
-
-def creer_path_user(user_exist):
-    if user_exist:
-        os.mkdir(path2 + '/' + user)
 ###################################################################################
 
 def modifier_user(user):
@@ -232,9 +234,7 @@ def modifier_user(user):
     global path_init
     global new_path
 
-    # La variable globale user_path represente le path de l'utilisateur
-    # dans /etc/passwd
-    path_init = user_path
+    path_init = user_path # user_path
     new_path = path_csv
     # Si l'utilisateur existe et que son path actuel ne correspond pas avec son path futur
     if user_exist and (path_init != new_path):
@@ -245,9 +245,8 @@ def modifier_user(user):
         try:
             os.mkdir(path_init)
         except FileExistsError:
-            print("Avant déplacement:", path_init, "-->", new_path)
+
             deplacer_user(path_init, path)
-            print("Apres déplacement:", path_init, "-->", new_path)
             os.system("usermod -d " + new_path + " " + user)
             
 ######################################################""
@@ -265,8 +264,6 @@ def deplacer_user(path_init, path):
     '''
     if path_init != new_path:
         os.system("mv " + path_init + " " + path)
-        os.system("ls /home/*/*" + path_init + " " + path)
-
 
 ########################################################################
 
@@ -280,16 +277,16 @@ def lire_groupe(groupe):
     '''
     global path2
     global groupe_exist
-    global path_du_groupe_exist
+    global path_du_groupe
 
     # Verifier le path du groupe
     path2 = os.path.join("/home/", groupe)
     if os.path.exists(path2):
         #print("Le path du groupe", groupe, "exist!", path2)
-        path_du_groupe_exist = True
+        path_du_groupe = True
     else:
         #print("Le path du groupe:", groupe, "n'existe pas!")
-        path_du_groupe_exist = False
+        path_du_groupe = False
 
     # Verifier /etc/group
     f = open("/etc/group", "r")
@@ -309,26 +306,23 @@ def lire_groupe(groupe):
             break
         i = i + 1
     f.close()
-    return groupe_exist, path_du_groupe_exist
 
 ####################################################################
 
-def creer_groupe(groupe_exist, path_du_groupe_exist):
+def creer_groupe(groupe):
     '''
     La fonction creer_groupe() permet de créer le groupe s'il n'existe pas.
     '''
-
-    if not groupe_exist and groupe != "-" and (not path_du_groupe_exist):
+    if not groupe_exist and groupe != "-":
         os.system("groupadd " + groupe)
-        creer_path_groupe(path_du_groupe_exist)
 
 ######################################################################
 
-def creer_path_groupe(path_du_groupe_exist):
+def creer_path_groupe(groupe):
     '''
     La fonction creer_path_groupe() permet de créer le /home/<groupe> s'il n'existe pas.
     '''
-    if not path_du_groupe_exist:
+    if not path_du_groupe:
         os.mkdir(path2)
         print("Le path du groupe", groupe, "vient d'être créer!", path2)
 
@@ -346,14 +340,9 @@ def supprimer_groupe(groupe):
 
 if __name__ == '__main__':
 
-    user_exist = False
-    user_path = ""
-    groupe_exist = False
-    path_du_groupe_exist = False
-    path2 = ""
-    path = ""
-    path_init = ""
-    new_path = ""
+    user_exist = True
+    user_path = "/home/"
+
     print("####################################################")
     start()
     print("####################################################")
