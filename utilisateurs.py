@@ -415,12 +415,7 @@ if __name__ == '__main__':
 
     verifier_fichier()
     run()
-    '''
-    try:
-        os.system("rmdir /home/*")
-    except FileExistsError:
-        print("Le dossier n'est pas vide")
-    '''
+    
     print("#######################################")
     #os.system("tail -n 6 /etc/passwd")
     print("#######################################")
