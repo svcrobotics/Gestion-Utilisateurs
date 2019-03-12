@@ -15,9 +15,9 @@ import pdb
 
 # Définition locale de fonctions #
 
-def verifier_fichier():
+def prerequis():
     '''
-    La fonction verifier_fichier() fait trois chose fondamentale, elle 
+    La fonction prerequis() fait trois choses fondamentale, elle 
     verifie que nous avons bien executer le script en mode root, puis 
     elle verifie que l'on a bien passer un fichier en argument et enfin 
     que le fichier en  question est bien un fichier valide c'est a dire qu'il a bien l'extention .csv.
@@ -250,6 +250,7 @@ def read_user():
     global user_exist
     global user_path
     global user_path_exist
+    global user_a_exister
 
     f = open("/etc/passwd", "r")
     i = 1
@@ -270,7 +271,7 @@ def read_user():
             break
         i = i + 1
     f.close()
-    return user_exist, user_path, user_path_exist
+    return user_exist, user_path, user_path_exist, user_a_exister
 
 def create_user():
     '''
@@ -291,6 +292,8 @@ def create_user():
         os.system("useradd -d /home/" + groupe + "/" + user + " -g " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
         os.system("passwd -e " + user)
         user_exist = True
+        read_deleted_user_file()
+        #print(user, "a exister", user_a_exister)
         creer_path_user()
         user_path_exist = True
     else:
@@ -300,19 +303,55 @@ def create_user():
 
     return user_exist, user_path_exist
 
+def read_deleted_user_file():
+    '''
+    '''
+    global user_a_exister
+    global user
+    global line
+
+    f = open("/deleted_user_file.txt", 'r')
+    i = 1
+    for line in f.readlines():
+        tab = line.split("-")
+        name = tab[0]
+
+        if name != user:
+            user_a_exister = False
+            continue
+        else:
+            user_a_exister = True
+            return line
+            break
+        i = i + 1
+    f.close()
+
+    return user_a_exister
+
 def creer_path_user():
     '''
     '''
     global user_path_exist
     global path_du_groupe
     global user_path
+    global user_a_exister
+    global line
 
-    try:
-        os.mkdir(path_du_groupe + '/' + user)
+    if not user_a_exister:
+        try:
+            os.mkdir(path_du_groupe + '/' + user)
+            user_path_exist = True
+            user_path = path_csv
+        except FileExistsError:
+            user_path_exist = True
+    else:
+        os.system("mkdir " + path_du_groupe + "/" + user)
+        #targz = user + "-" + date + ".tar.gz"
+        #print(line)
+        os.system("cd " + path_du_groupe + " && tar -xvzf " + "/archives/" + line)
+        os.system("rm /archives/" + line)
         user_path_exist = True
         user_path = path_csv
-    except FileExistsError:
-        user_path_exist = True
         
     return user_path_exist, user_path
 
@@ -325,12 +364,6 @@ def edit_user():
     '''
     global groupe
 
-    '''
-    try:
-        deplacer_user()
-    except FileExistsError:
-        print("L'utilisateur a déjà été déplacer.")
-    '''
     if groupe == "-":
         try:
             deplacer_user()
@@ -351,12 +384,14 @@ def archiver_user():
     global user
     global user_path
     global path_csv
+    global path_du_groupe
+    global date
 
     if groupe == "-":
-        date = datetime.datetime.now().strftime("%d-%m-%y")
-        os.system("tar czvf " + user + ".tar.gz " + path_csv)
-        os.system("mv " + path_csv + " /archives/" + user + "-" + date + ".tar.gz")
-        
+        backup_dir = "/archives/"
+        targz = user + "-" + date + ".tar.gz"
+        os.system("cd " + path_du_groupe + " && tar -czvf " + backup_dir + targz + " " + user + "/")
+        os.system("rm -R " + user_path)
 
 def detruire_user():
     '''
@@ -364,9 +399,16 @@ def detruire_user():
     global path_du_groupe
     global user
     global user_exist
+    global date
 
     os.system("userdel " + user)
     user_exist = False
+    
+    f = open("/deleted_user_file.txt", "a")
+    targz = user + "-" + date + ".tar.gz"
+    f.write(targz + "\n")
+    f.close()
+    
     try:
         os.system("rmdir " + path_du_groupe)
     except FileExistsError:
@@ -386,10 +428,6 @@ def deplacer_user():
     global user
 
     print("#######################################")
-    #print("user_path", user_path)
-    #print("path_du_groupe", path_du_groupe)
-    #print("user", user)
-    #print("path_csv", path_csv)
 
     if user_path != "" and (user_path != path_csv):
         #os.system("cd " + path)
@@ -397,7 +435,6 @@ def deplacer_user():
         os.system("usermod -d " + path_csv + " " + user)
         os.system("rm -R " + user_path)
         user_path = path_csv
-        #print("Maintenant user_path", user_path)
 
     return user_path
     
@@ -405,19 +442,21 @@ def deplacer_user():
 #########################################################
 if __name__ == '__main__':
 
+    user_a_exister = False
     groupe_exist = False
     path_du_groupe_exist = False
     path_du_groupe = ""
-
+    date = datetime.datetime.now().strftime("%d-%m-%y")
     user_exist = False
     user_path_exist = False
     user_path = ""
+    line =""
 
-    verifier_fichier()
+    prerequis()
     run()
     
     print("#######################################")
-    #os.system("tail -n 6 /etc/passwd")
+    os.system("tail -n 6 /etc/passwd")
     print("#######################################")
     #os.system("tail -n 5 /etc/group")
     print("#######################################")
