@@ -20,7 +20,7 @@ def prerequis():
     La fonction prerequis() fait trois choses fondamentale, elle 
     verifie que nous avons bien executer le script en mode root, puis 
     elle verifie que l'on a bien passer un fichier en argument et enfin 
-    que le fichier en  question est bien un fichier valide c'est a dire qu'il a bien l'extention .csv.
+    que le fichier en question est bien un fichier valide c'est a dire qu'il a bien l'extention .csv.
     '''
 # Tout d'abord on vérifie que le script a bien été exécuté 
 # en tant que root (la fonction geteuid() retourne l'identifiant 
@@ -38,7 +38,6 @@ def prerequis():
     if len(sys.argv) > 1:
         global fichier_csv
         fichier_csv = sys.argv[1]
-        #print("Vous avez bien passez un fichier en paramètre.")
     else:
         print("Ou est le fichier .csv ?")
         sys.exit(0)
@@ -102,42 +101,27 @@ def run():
         # On cherche a repondre a la question /home/<groupe> exist? et 
         # groupe est dans /etc/group ? 
         read_groupe()
-        #print(groupe_exist, path_du_groupe_exist)
-        #pdb.set_trace()
+        # 
         read_user()
-        #print(user_exist, user_path_exist)
-        #pdb.set_trace()
+        #
         iter = 1
         while True:
             if groupe_exist:
-                #print("pass1", groupe_exist)
-                #pdb.set_trace()
                 if path_du_groupe_exist:
-                    #print("pass3", path_du_groupe, path_du_groupe_exist)
-                    #pdb.set_trace()
                     if user_exist:
-                        #create_user()
                         if user_path == path_csv:
-                            #print("pass4", user, user_exist)
-                            #pdb.set_trace()
                             break
                         else:
                             edit_user()
                             continue
                     else:
                         create_user()
-                        #print("pass5", user, user_exist)
-                        #pdb.set_trace()
                         continue
                 else:
                     creer_path_groupe()
-                    #print("pass4", path_du_groupe, path_du_groupe_exist)
-                    #pdb.set_trace()
                     continue
             else:
                 create_groupe()
-                #print("pass2", groupe_exist)
-                #pdb.set_trace()
                 continue
 
             iter += 1
@@ -169,12 +153,10 @@ def read_groupe():
     # Verifier le path du groupe, qui doit etre /home/<groupe>
     # Si le path existe return path_du_groupe_exist == True
     # Sinon return path_du_groupe_exist == False
-    #path_du_groupe = os.path.join("/home/", groupe)
+    
     if os.path.exists(path_du_groupe):
-        #print("Le path du groupe", groupe, "exist!", path_du_groupe)
         path_du_groupe_exist = True
     else:
-        #print("Le path du groupe:", groupe, "n'existe pas!")
         path_du_groupe_exist = False
 
     # Le groupe existe t-il dans /etc/group ?
@@ -187,17 +169,16 @@ def read_groupe():
         tab = line.split(':')
         # La première colonne dans /etc/group correspond on nom du groupe
         c_groupe = tab[0]
-        gid = tab[2]
 
         if c_groupe != groupe:
             groupe_exist = False
             continue
         else:
-            #print("Le groupe", groupe, "existe bien dans /etc/group, " + "son GID est", gid)
             groupe_exist = True
             break
         i = i + 1
     f.close()
+
     return groupe_exist, path_du_groupe_exist, path_du_groupe
 
 
@@ -209,13 +190,10 @@ def create_groupe():
 
     if not groupe_exist and groupe != "-":
         os.system("groupadd " + groupe)
-        #print("Le groupe", groupe, "vient d'etre creer dans /etc/group.")
         groupe_exist = True
     elif groupe == "-":
-        #print("Le groupe", groupe, "ne sera pas créer dans /etc/group.")
         groupe_exist = True
     else:
-        #print("Le groupe", groupe, "existe deja dans /etc/group.")
         groupe_exist = True
 
     return groupe_exist
@@ -232,10 +210,8 @@ def creer_path_groupe():
             os.mkdir(path_du_groupe)
             path_du_groupe_exist = True
         except FileExistsError:
-            #print("Le path du groupe", groupe, "vient d'être créer!", path_du_groupe)
             path_du_groupe_exist = True
     else:
-        #print("Le path du groupe", groupe, "a deja été créer!", path_du_groupe)
         path_du_groupe_exist = True
 
     return path_du_groupe_exist
@@ -264,13 +240,13 @@ def read_user():
             user_exist = False
             continue
         else:
-            #print("L'utilisateur", user, "existe dans /etc/passwd.")
             user_path = tab[5]
             user_path_exist = True
             user_exist = True
             break
         i = i + 1
     f.close()
+
     return user_exist, user_path, user_path_exist, user_a_exister
 
 def create_user():
@@ -293,11 +269,9 @@ def create_user():
         os.system("passwd -e " + user)
         user_exist = True
         read_deleted_user_file()
-        #print(user, "a exister", user_a_exister)
         creer_path_user()
         user_path_exist = True
     else:
-        #print("L'utilisateur existe.")
         user_exist = True
         user_path_exist = True
 
@@ -346,8 +320,6 @@ def creer_path_user():
             user_path_exist = True
     else:
         os.system("mkdir " + path_du_groupe + "/" + user)
-        #targz = user + "-" + date + ".tar.gz"
-        #print(line)
         os.system("cd " + path_du_groupe + " && tar -xvzf " + "/archives/" + line)
         os.system("rm /archives/" + line)
         user_path_exist = True
@@ -430,7 +402,6 @@ def deplacer_user():
     print("#######################################")
 
     if user_path != "" and (user_path != path_csv):
-        #os.system("cd " + path)
         os.system("cp -R " + user_path + " " + path_du_groupe)
         os.system("usermod -d " + path_csv + " " + user)
         os.system("rm -R " + user_path)
