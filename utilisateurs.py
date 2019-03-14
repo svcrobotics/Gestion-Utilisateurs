@@ -16,12 +16,12 @@ import pdb
 # Définition locale de fonctions #
 
 def prerequis():
-    '''
-    La fonction prerequis() fait trois choses fondamentale, elle 
+    """La fonction prerequis() fait trois choses fondamentale, elle 
     verifie que nous avons bien executer le script en mode root, puis 
     elle verifie que l'on a bien passer un fichier en argument et enfin 
     que le fichier en question est bien un fichier valide c'est a dire qu'il a bien l'extention .csv.
-    '''
+
+    """
 # Tout d'abord on vérifie que le script a bien été exécuté 
 # en tant que root (la fonction geteuid() retourne l'identifiant 
 # numérique de l'utilisateur) 0 dans le cas de root.
@@ -61,11 +61,11 @@ def prerequis():
 
 
 def run():
-    '''
-    La fonction run() permet de lire les lignes d'un fichier, de formatter 
+    """La fonction run() permet de lire les lignes d'un fichier, de formatter 
     les données et d'executer plusieurs fonctions permettant la création, modification des groupes
     et utilisateurs.
-    '''
+
+    """
 
     global groupe
     global user
@@ -130,22 +130,23 @@ def run():
     f.close()
 
 def formatage(valeur):
-    ''' 
+    """
     La fonction formatage() est chargée d'enlever les accents, les espaces de transformer la
     chaîne de caractères en minuscules d'enlever les retour chariot en fin de ligne et d'eliminer les tabulations. 
-    '''
+    """
 
     val = valeur.lower().replace("é", "e").replace(".", "").replace(" ", "").replace("è", "e").strip('\t\t').rstrip('\n\r')
     return val
 
 def read_groupe():
-    '''
+    """
     La fonction read_groupe() permet de vérifier que le groupe passer en paramètre
     est bien dans le path /home/<groupe>/, elle enregistre True ou False dans
     la variable path_du_groupe, elle permet aussi de verifier que le groupe 
     existe dans /etc/group et d'enregistrer True ou False dans la variable 
     groupe_exist.
-    '''
+    """
+
     global path_du_groupe
     global path_du_groupe_exist
     global groupe_exist
@@ -183,9 +184,10 @@ def read_groupe():
 
 
 def create_groupe():
-    '''
+    """
     La fonction creer_groupe() permet de créer le groupe s'il n'existe pas.
-    '''
+    """
+
     global groupe_exist
 
     if not groupe_exist and groupe != "-":
@@ -199,9 +201,10 @@ def create_groupe():
     return groupe_exist
 
 def creer_path_groupe():
-    '''
+    """
     La fonction creer_path_groupe() permet de créer le /home/<groupe> s'il n'existe pas.
-    '''
+    """
+
     global path_du_groupe_exist
     global path_du_groupe
 
@@ -217,12 +220,13 @@ def creer_path_groupe():
     return path_du_groupe_exist
 
 def read_user():
-    '''
+    """
     La fonction read_user() permet de savoir si un utilisateur existe ou non dans 
     /etc/passwd nous enregistrons cette donnée dans la variable user_exist, elle nous 
     permet aussi de savoir quel est le path actuel de l'utilisateur nous enregistrons 
     cette information dans la variable user_path.
-    '''
+    """
+
     global user_exist
     global user_path
     global user_path_exist
@@ -250,10 +254,10 @@ def read_user():
     return user_exist, user_path, user_path_exist, user_a_exister
 
 def create_user():
-    '''
+    """
     La fonction creer_user() permet de creer un utilisateur s'il n'existe pas 
     dans /etc/passwd.
-    '''
+    """
     # Le répertoire squelette (/etc/skel/) contient les fichiers et 
     # répertoires qui seront copiés dans le répertoire 
     # personnel de l’utilisateur au moment de sa création.
@@ -265,10 +269,11 @@ def create_user():
     global user_path_exist
 
     if not user_exist and groupe != "-":
-        os.system("useradd -d /home/" + groupe + "/" + user + " -g " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
+        os.system("useradd -m -d /home/" + groupe + "/" + user + " -G " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
         os.system("passwd -e " + user)
         user_exist = True
         read_deleted_user_file()
+        
         creer_path_user()
         user_path_exist = True
     else:
@@ -278,8 +283,9 @@ def create_user():
     return user_exist, user_path_exist
 
 def read_deleted_user_file():
-    '''
-    '''
+    """
+    """
+
     global user_a_exister
     global user
     global line
@@ -303,8 +309,9 @@ def read_deleted_user_file():
     return user_a_exister
 
 def creer_path_user():
-    '''
-    '''
+    """
+    """
+
     global user_path_exist
     global path_du_groupe
     global user_path
@@ -313,13 +320,12 @@ def creer_path_user():
 
     if not user_a_exister:
         try:
-            os.mkdir(path_du_groupe + '/' + user)
+            os.mkdir(path_du_groupe + user)
             user_path_exist = True
             user_path = path_csv
         except FileExistsError:
             user_path_exist = True
     else:
-        os.system("mkdir " + path_du_groupe + "/" + user)
         os.system("cd " + path_du_groupe + " && tar -xvzf " + "/archives/" + line)
         os.system("rm /archives/" + line)
         user_path_exist = True
@@ -328,12 +334,13 @@ def creer_path_user():
     return user_path_exist, user_path
 
 def edit_user():
-    '''
+    """
     La fonction edit_user() permet a condition que l'utilisateur existe et que 
     son path dans /etc/passwd soit different du path que l'on a récuperez du fichier 
     .csv de déplacer son répertoire actuel dans un nouveau répertoire stipuler dans le fichier
     .csv.
-    '''
+    """
+
     global groupe
 
     if groupe == "-":
@@ -348,11 +355,12 @@ def edit_user():
 
 
 def archiver_user():
-    '''
+    """
     La fonction archiver_user() crée en premier lieu une archive au format gzip de l'utilisateur
     puis déplace le répertoire de l'utilisateur dans /archives/ et enfin supprime le répertoire de 
     l'utilisateur.
-    '''
+    """
+
     global user
     global user_path
     global path_csv
@@ -366,8 +374,9 @@ def archiver_user():
         os.system("rm -R " + user_path)
 
 def detruire_user():
-    '''
-    '''
+    """
+    """
+
     global path_du_groupe
     global user
     global user_exist
@@ -389,11 +398,12 @@ def detruire_user():
     return user_exist
 
 def deplacer_user():
-    '''
+    """
     La fonction deplacer_user() permet a condition que le path dans /etc/passwd
     ne corresponde pas au nouveau path stipuler dans fichier_csv, de déplacer le répertoire courant
     de l'utilisateur dans son nouveau répertoire.
-    '''
+    """
+
     global user_path
     global path_du_groupe
     global path_csv
@@ -426,12 +436,12 @@ if __name__ == '__main__':
     prerequis()
     run()
     
-    print("#######################################")
+    print("#####  /etc/passwd  #################")
     os.system("tail -n 6 /etc/passwd")
-    print("#######################################")
-    #os.system("tail -n 5 /etc/group")
-    print("#######################################")
+    print("#####  /etc/group  ####################")
+    os.system("tail /etc/group")
+    print("#####  /home/*  #######################")
     os.system("ls /home/*")
-    print("#######################################")
+    print("#####  /archives/  ####################")
     os.system("ls /archives/")
     print("#######################################")
