@@ -130,21 +130,21 @@ def run():
     f.close()
 
 def formatage(valeur):
-    """
-    La fonction formatage() est chargée d'enlever les accents, les espaces de transformer la
+    """La fonction formatage() est chargée d'enlever les accents, les espaces de transformer la
     chaîne de caractères en minuscules d'enlever les retour chariot en fin de ligne et d'eliminer les tabulations. 
+    
     """
 
     val = valeur.lower().replace("é", "e").replace(".", "").replace(" ", "").replace("è", "e").strip('\t\t').rstrip('\n\r')
     return val
 
 def read_groupe():
-    """
-    La fonction read_groupe() permet de vérifier que le groupe passer en paramètre
+    """La fonction read_groupe() permet de vérifier que le groupe passer en paramètre
     est bien dans le path /home/<groupe>/, elle enregistre True ou False dans
     la variable path_du_groupe, elle permet aussi de verifier que le groupe 
     existe dans /etc/group et d'enregistrer True ou False dans la variable 
     groupe_exist.
+    
     """
 
     global path_du_groupe
@@ -184,8 +184,8 @@ def read_groupe():
 
 
 def create_groupe():
-    """
-    La fonction creer_groupe() permet de créer le groupe s'il n'existe pas.
+    """La fonction creer_groupe() permet de créer le groupe s'il n'existe pas.
+    
     """
 
     global groupe_exist
@@ -201,8 +201,8 @@ def create_groupe():
     return groupe_exist
 
 def creer_path_groupe():
-    """
-    La fonction creer_path_groupe() permet de créer le /home/<groupe> s'il n'existe pas.
+    """La fonction creer_path_groupe() permet de créer le /home/<groupe> s'il n'existe pas.
+    
     """
 
     global path_du_groupe_exist
@@ -220,11 +220,11 @@ def creer_path_groupe():
     return path_du_groupe_exist
 
 def read_user():
-    """
-    La fonction read_user() permet de savoir si un utilisateur existe ou non dans 
+    """La fonction read_user() permet de savoir si un utilisateur existe ou non dans 
     /etc/passwd nous enregistrons cette donnée dans la variable user_exist, elle nous 
     permet aussi de savoir quel est le path actuel de l'utilisateur nous enregistrons 
     cette information dans la variable user_path.
+    
     """
 
     global user_exist
@@ -254,9 +254,9 @@ def read_user():
     return user_exist, user_path, user_path_exist, user_a_exister
 
 def create_user():
-    """
-    La fonction creer_user() permet de creer un utilisateur s'il n'existe pas 
+    """La fonction creer_user() permet de creer un utilisateur s'il n'existe pas 
     dans /etc/passwd.
+    
     """
     # Le répertoire squelette (/etc/skel/) contient les fichiers et 
     # répertoires qui seront copiés dans le répertoire 
@@ -269,7 +269,7 @@ def create_user():
     global user_path_exist
 
     if not user_exist and groupe != "-":
-        os.system("useradd -m -d /home/" + groupe + "/" + user + " -G " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
+        os.system("useradd -d /home/" + groupe + "/" + user + " -g " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
         os.system("passwd -e " + user)
         user_exist = True
         read_deleted_user_file()
@@ -317,10 +317,15 @@ def creer_path_user():
     global user_path
     global user_a_exister
     global line
+    global groupe
+    global user
 
     if not user_a_exister:
         try:
             os.mkdir(path_du_groupe + user)
+            #
+            os.system("cp -rT /etc/skel " + path_du_groupe + user)
+            os.system("chown -R " + user + ":" + groupe + " " + path_du_groupe + user)
             user_path_exist = True
             user_path = path_csv
         except FileExistsError:
@@ -328,17 +333,18 @@ def creer_path_user():
     else:
         os.system("cd " + path_du_groupe + " && tar -xvzf " + "/archives/" + line)
         os.system("rm /archives/" + line)
+        os.system("chown -R " + user + ":" + groupe + " " + path_du_groupe + user)
         user_path_exist = True
         user_path = path_csv
         
     return user_path_exist, user_path
 
 def edit_user():
-    """
-    La fonction edit_user() permet a condition que l'utilisateur existe et que 
+    """La fonction edit_user() permet a condition que l'utilisateur existe et que 
     son path dans /etc/passwd soit different du path que l'on a récuperez du fichier 
     .csv de déplacer son répertoire actuel dans un nouveau répertoire stipuler dans le fichier
     .csv.
+    
     """
 
     global groupe
@@ -355,10 +361,10 @@ def edit_user():
 
 
 def archiver_user():
-    """
-    La fonction archiver_user() crée en premier lieu une archive au format gzip de l'utilisateur
+    """La fonction archiver_user() crée en premier lieu une archive au format gzip de l'utilisateur
     puis déplace le répertoire de l'utilisateur dans /archives/ et enfin supprime le répertoire de 
     l'utilisateur.
+    
     """
 
     global user
@@ -398,22 +404,28 @@ def detruire_user():
     return user_exist
 
 def deplacer_user():
-    """
-    La fonction deplacer_user() permet a condition que le path dans /etc/passwd
+    """La fonction deplacer_user() permet a condition que le path dans /etc/passwd
     ne corresponde pas au nouveau path stipuler dans fichier_csv, de déplacer le répertoire courant
     de l'utilisateur dans son nouveau répertoire.
+
     """
 
     global user_path
     global path_du_groupe
     global path_csv
     global user
+    global groupe
 
     print("#######################################")
 
     if user_path != "" and (user_path != path_csv):
         os.system("cp -R " + user_path + " " + path_du_groupe)
         os.system("usermod -d " + path_csv + " " + user)
+
+        if groupe != "-":
+            os.system("usermod -g " + groupe + " " + user)
+            os.system("chown -R " + user + ":" + groupe + " " + path_du_groupe + user)
+        
         os.system("rm -R " + user_path)
         user_path = path_csv
 
@@ -433,6 +445,18 @@ if __name__ == '__main__':
     user_path = ""
     line =""
 
+    try:
+        os.system("touch /deleted_user_file.txt")
+    except FileExistsError:
+        print("Le fichier existe déjà!")
+
+    '''    
+    try:
+        os.system("mkdir /archives/")
+    except FileExistsError:
+        print("Le répertoire existe déjà!")
+    '''
+
     prerequis()
     run()
     
@@ -440,8 +464,8 @@ if __name__ == '__main__':
     os.system("tail -n 6 /etc/passwd")
     print("#####  /etc/group  ####################")
     os.system("tail /etc/group")
-    print("#####  /home/*  #######################")
-    os.system("ls /home/*")
+    print("#####  /home/*/*  #######################")
+    os.system("ls -al /home/*/*")
     print("#####  /archives/  ####################")
     os.system("ls /archives/")
     print("#######################################")
