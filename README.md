@@ -1,4 +1,4 @@
-# Gestion utilisateurs
+# Gestion Utilisateurs
 
 ## Besoin
 
@@ -8,13 +8,13 @@ Ce fichier, appelé *data.csv*, pourrait alors avoir le contenu suivant :
 
 | Prénom    | Nom         | Mot de passe | Goupe        |
 | --------- | ----------- | ------------ | ------------ |
-| Suzanne   | Sto Hélit   | bigadin      | Comptabilité        |
-| Esméralda | Ciredutemps | gytha        | Formation       |
-| Havelock  | Vétérrini   | serviteur    | System |
-| Mustrum   | Ridculle    | ciredutemps  | Direction   |
+| Suzanne   | Sto Hélit   | bigadin      | Comptabilité |
+| Esméralda | Ciredutemps | gytha        | Formation    |
+| Havelock  | Vétérrini   | serviteur    | System       |
+| Mustrum   | Ridculle    | ciredutemps  | Direction    |
 | Planteur  | J.M.T.L.G.  | brioche      | -            |
 
-Le mot de passe correspond au mot de passe original de l'utilisateur (celui-ci doit le modifier à sa première connexion), le lieu correspond à un secteur auquel l'utilisateur est rattaché; lorsque le lieu est remplacé par un tiret, l'utilisateur doit être supprimé et ses données archivées.
+Le mot de passe correspond au mot de passe original de l'utilisateur (celui-ci doit le modifier à sa première connexion), le groupe correspond à un secteur auquel l'utilisateur est rattaché; lorsque le groupe est remplacé par un tiret, l'utilisateur doit être supprimé et ses données archivées.
 
 La tache quotidienne de cet administrateur est alors multiple:
 
@@ -26,14 +26,14 @@ La tache quotidienne de cet administrateur est alors multiple:
 
 Dans ce cadre:
 
-- Les noms d'utilisateurs doivent avoir le format "nom_prenom", les accents doivent être supprimés et les majuscules doivent devenir des minuscules (de même pour les noms de groupes, liés aux lieux).
+- Les noms d'utilisateurs doivent avoir le format "nom_prenom", les accents doivent être supprimés et les majuscules doivent devenir des minuscules de même pour les noms de groupes.
 
-- Chaque utilisateur doit être associé à un groupe nommé selon le lieu auquel il est rattaché.
+- Chaque utilisateur doit être associé à un groupe.
 
-- Ses fichiers doivent être dans le répertoire
+- Les fichiers de l'utilisateurs doivent être dans le répertoire
 
   ```
-  /home/<lieu>/<utilisateur>
+  /home/<groupe>/<utilisateur>
   ```
 
 - S'il n'existe pas déjà, le répertoire de l'utilisateur doit contenir une copie du contenu du répertoire */etc/skel* et son mot de passe doit être celui qui est donné dans le fichier (avec obligation de le changer à la prochaine connexion).

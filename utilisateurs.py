@@ -93,9 +93,11 @@ def run():
         # La variable groupe sera utiliser par la suite dans d'autre fonctions
         # Nous avons donc rendu sa portée globale
         groupe = formatage(tab[3]).strip('\t\t')
-        #lieu = formatage(tab[4]).strip('\t\t')
+        # Création de la variable user en respectant le README
         user = nom + "_" + prenom
+        # Le répertoire utlisateur tel qu'il devra être
         path_csv = "/home/" + groupe + "/" + user
+        # Le HOME_DIR
         path_du_groupe = "/home/" + groupe + "/"
         ############################""
         # On cherche a répondre a la question /home/<groupe> exist? et 
@@ -141,8 +143,8 @@ def formatage(valeur):
 def read_groupe():
     """La fonction read_groupe() permet de vérifier que le groupe passer en paramètre
     est bien dans le path /home/<groupe>/, elle enregistre True ou False dans
-    la variable path_du_groupe, elle permet aussi de vérifier que le groupe 
-    existe dans /etc/group et d'enregistrer True ou False dans la variable 
+    la variable path_du_groupe_exist, elle permet aussi de vérifier que le groupe 
+    existe dans /etc/group, d'enregistrer True ou False dans la variable 
     groupe_exist.
     
     """
@@ -184,7 +186,8 @@ def read_groupe():
 
 
 def create_groupe():
-    """La fonction creer_groupe() permet de créer le groupe s'il n'existe pas.
+    """La fonction create_groupe() permet de créer le groupe dans /etc/group 
+    s'il n'existe pas.
     
     """
 
@@ -230,7 +233,6 @@ def read_user():
     global user_exist
     global user_path
     global user_path_exist
-    global user_a_exister
 
     f = open("/etc/passwd", "r")
     i = 1
@@ -251,16 +253,13 @@ def read_user():
         i = i + 1
     f.close()
 
-    return user_exist, user_path, user_path_exist, user_a_exister
+    return user_exist, user_path, user_path_exist
 
 def create_user():
-    """La fonction creer_user() permet de créer un utilisateur s'il n'existe pas 
-    dans /etc/passwd.
+    """La fonction create_user() permet de créer un utilisateur s'il n'existe pas 
+    dans /etc/passwd, et de retourner True or False a user_exist et user_path_exist
     
     """
-    # Le répertoire squelette (/etc/skel/) contient les fichiers et 
-    # répertoires qui seront copiés dans le répertoire 
-    # personnel de l’utilisateur au moment de sa création.
     
     global user_exist
     global user
@@ -269,11 +268,14 @@ def create_user():
     global user_path_exist
 
     if not user_exist and groupe != "-":
+        # Creation de l'utilisateur avec son mot de passe et son repertoire courant
         os.system("useradd -d /home/" + groupe + "/" + user + " -g " + groupe + " -s /bin/bash " + " --password  $(mkpasswd -H md5 " + password + " ) " + user )
+        # A la premiere connextion l'utilisateur doit changer son mot de passe
         os.system("passwd -e " + user)
         user_exist = True
+        # On verifier si l'utilisateur a exister par le passer
         read_deleted_user_file()
-        
+        # Modification apporter au path si l'utilisateur a exister par le passer
         creer_path_user()
         user_path_exist = True
     else:
@@ -283,7 +285,9 @@ def create_user():
     return user_exist, user_path_exist
 
 def read_deleted_user_file():
-    """
+    """La fonction read_deleted_user_file() cherche a répondre a la question l'utilisateur
+    a-t-il déja exister? 
+
     """
 
     global user_a_exister
@@ -301,6 +305,7 @@ def read_deleted_user_file():
             continue
         else:
             user_a_exister = True
+            # line correspond au nom d'utulisateur
             return line
             break
         i = i + 1
@@ -309,7 +314,9 @@ def read_deleted_user_file():
     return user_a_exister
 
 def creer_path_user():
-    """
+    """La fonction creer_path_user() permet de construire le repertoire courant
+    de l'utilisateur, en tenant compte de son existance passer.
+
     """
 
     global user_path_exist
@@ -322,17 +329,26 @@ def creer_path_user():
 
     if not user_a_exister:
         try:
+            # Si l'utilisateur n'a pas été créer préalablement
             os.mkdir(path_du_groupe + user)
-            #
+            # Le répertoire squelette (/etc/skel/) contient les fichiers et 
+            # répertoires qui seront copiés dans le répertoire 
+            # personnel de l’utilisateur.
             os.system("cp -rT /etc/skel " + path_du_groupe + user)
+            # Gestion des droits sur les fichiers du répertoire utilisateur 
+            # le proprietaire des fichiers créer est l'utilisateur et son groupe est groupe
             os.system("chown -R " + user + ":" + groupe + " " + path_du_groupe + user)
             user_path_exist = True
             user_path = path_csv
         except FileExistsError:
             user_path_exist = True
     else:
+        # Si l'utilisateur avait déja exister par le passer alors on désarchive son ancien répertoire 
+        # qui se trouve dans /archives/
         os.system("cd " + path_du_groupe + " && tar -xvzf " + "/archives/" + line)
+        # On detruit son tar.gz
         os.system("rm /archives/" + line)
+        # On remet les droits adecuat sur les fichiers de tel maniere que le groupe corresponde bien
         os.system("chown -R " + user + ":" + groupe + " " + path_du_groupe + user)
         user_path_exist = True
         user_path = path_csv
@@ -359,6 +375,7 @@ def edit_user():
     else:
         deplacer_user()
 
+    return 0
 
 def archiver_user():
     """La fonction archiver_user() crée en premier lieu une archive au format gzip de l'utilisateur
@@ -379,8 +396,12 @@ def archiver_user():
         os.system("cd " + path_du_groupe + " && tar -czvf " + backup_dir + targz + " " + user + "/")
         os.system("rm -R " + user_path)
 
+    return 0
+
 def detruire_user():
-    """
+    """La fonction détruire_user() ne fait pas que ça, elle sauvegarde le nom de l'utilisateur
+    dans un fichier qui sera utiliser dans une autre fonction.
+
     """
 
     global path_du_groupe
@@ -420,10 +441,13 @@ def deplacer_user():
 
     if user_path != "" and (user_path != path_csv):
         os.system("cp -R " + user_path + " " + path_du_groupe)
+        # Modification du path dans le fichier /etc/passwd
         os.system("usermod -d " + path_csv + " " + user)
 
         if groupe != "-":
+            # Modification du nom du groupe
             os.system("usermod -g " + groupe + " " + user)
+            # Modification des droits sur les fichiers de l'utilisateur
             os.system("chown -R " + user + ":" + groupe + " " + path_du_groupe + user)
         
         os.system("rm -R " + user_path)
