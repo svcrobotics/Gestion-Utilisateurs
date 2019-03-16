@@ -474,20 +474,20 @@ if __name__ == '__main__':
     except FileExistsError:
         print("Le fichier existe déjà!")
 
-    '''    
     try:
         os.system("mkdir /archives/")
     except FileExistsError:
         print("Le répertoire existe déjà!")
-    '''
 
     prerequis()
     run()
     
     print("#####  /etc/passwd  #################")
     os.system("tail -n 6 /etc/passwd")
+    print("#####  /etc/shadow  #################")
+    os.system("tail -n 6 /etc/shadow")
     print("#####  /etc/group  ####################")
-    os.system("tail /etc/group")
+    os.system("tail -n 8 /etc/group")
     print("#####  /home/*/*  #######################")
     os.system("ls -al /home/*/*")
     print("#####  /archives/  ####################")
