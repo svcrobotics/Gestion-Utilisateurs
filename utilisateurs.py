@@ -17,9 +17,9 @@ import pdb
 
 def prerequis():
     """La fonction prerequis() fait trois choses fondamentale, elle 
-    verifie que nous avons bien executer le script en mode root, puis 
-    elle verifie que l'on a bien passer un fichier en argument et enfin 
-    que le fichier en question est bien un fichier valide c'est a dire qu'il a bien l'extention .csv.
+    vérifie que nous avons bien exécuter le script en mode root, puis 
+    elle vérifie que l'on a bien passer un fichier en argument et enfin 
+    que le fichier en question est bien un fichier valide c'est a dire qu'il a bien l’extension .csv.
 
     """
 # Tout d'abord on vérifie que le script a bien été exécuté 
@@ -44,7 +44,7 @@ def prerequis():
 
 # Enfin, on vérifie que le fichier en question existe 
 # (on stoppe le script s'il n'existe pas) et que l'extension du fichier
-# est bien .csv pour evité d'ouvrir un autre type de fichier:
+# est bien .csv pour évité d'ouvrir un autre type de fichier:
 
     exists = os.path.exists(fichier_csv)
 # basename permet d'obtenir le nom d'un fichier et son extension à partir d'un chemin d'accès
@@ -57,12 +57,12 @@ def prerequis():
 
 #######################################################################################
 # La liste des données est lue ligne par ligne, la ligne 
-# d'en-tête est supprimée et on formatte les données:
+# d'en-tête est supprimée et on formate les données:
 
 
 def run():
-    """La fonction run() permet de lire les lignes d'un fichier, de formatter 
-    les données et d'executer plusieurs fonctions permettant la création, modification des groupes
+    """La fonction run() permet de lire les lignes d'un fichier, de formater 
+    les données et d’exécuter plusieurs fonctions permettant la création, modification des groupes
     et utilisateurs.
 
     """
@@ -79,15 +79,15 @@ def run():
     # On lit la première ligne du fichier
     line = f.readline()
     i = 1
-    # readlines() va nous permettre de lire les differentes lignes du fichier sauf celle lu par readline()
+    # readlines() va nous permettre de lire les différentes lignes du fichier sauf celle lu par readline()
     for line in f.readlines():
         # On découpe la ligne du fichier (slit) et on la sauvegarde dans un tableau
         tab = line.split(";")
-        # strip() nous permet déffacer des éléments indésirable ici des espaces et des tabulations
-        # nous avons récuperez l'élément du tableau situé a l'indice 2 cela correspond au mot de passe
+        # strip() nous permet d’effacer des éléments indésirable ici des espaces et des tabulations
+        # nous avons récupérez l'élément du tableau situé a l'indice 2 cela correspond au mot de passe
         # et nous l'avons stocker dans une variable password
         password = tab[2].strip('\t\t').strip('  ')
-        # Nous avons appeller la fonction formatage() créer par nos soins 
+        # Nous avons appeler la fonction formatage() créer par nos soins 
         nom = formatage(tab[1]).strip('\t\t')
         prenom = formatage(tab[0]).strip('\t\t')
         # La variable groupe sera utiliser par la suite dans d'autre fonctions
@@ -98,7 +98,7 @@ def run():
         path_csv = "/home/" + groupe + "/" + user
         path_du_groupe = "/home/" + groupe + "/"
         ############################""
-        # On cherche a repondre a la question /home/<groupe> exist? et 
+        # On cherche a répondre a la question /home/<groupe> exist? et 
         # groupe est dans /etc/group ? 
         read_groupe()
         # 
@@ -131,7 +131,7 @@ def run():
 
 def formatage(valeur):
     """La fonction formatage() est chargée d'enlever les accents, les espaces de transformer la
-    chaîne de caractères en minuscules d'enlever les retour chariot en fin de ligne et d'eliminer les tabulations. 
+    chaîne de caractères en minuscules d'enlever les retour chariot en fin de ligne et d’éliminer les tabulations. 
     
     """
 
@@ -141,7 +141,7 @@ def formatage(valeur):
 def read_groupe():
     """La fonction read_groupe() permet de vérifier que le groupe passer en paramètre
     est bien dans le path /home/<groupe>/, elle enregistre True ou False dans
-    la variable path_du_groupe, elle permet aussi de verifier que le groupe 
+    la variable path_du_groupe, elle permet aussi de vérifier que le groupe 
     existe dans /etc/group et d'enregistrer True ou False dans la variable 
     groupe_exist.
     
@@ -151,7 +151,7 @@ def read_groupe():
     global path_du_groupe_exist
     global groupe_exist
 
-    # Verifier le path du groupe, qui doit etre /home/<groupe>
+    # Vérifier le path du groupe, qui doit être /home/<groupe>
     # Si le path existe return path_du_groupe_exist == True
     # Sinon return path_du_groupe_exist == False
     
@@ -254,7 +254,7 @@ def read_user():
     return user_exist, user_path, user_path_exist, user_a_exister
 
 def create_user():
-    """La fonction creer_user() permet de creer un utilisateur s'il n'existe pas 
+    """La fonction creer_user() permet de créer un utilisateur s'il n'existe pas 
     dans /etc/passwd.
     
     """
@@ -341,7 +341,7 @@ def creer_path_user():
 
 def edit_user():
     """La fonction edit_user() permet a condition que l'utilisateur existe et que 
-    son path dans /etc/passwd soit different du path que l'on a récuperez du fichier 
+    son path dans /etc/passwd soit différent du path que l'on a récupérez du fichier 
     .csv de déplacer son répertoire actuel dans un nouveau répertoire stipuler dans le fichier
     .csv.
     
