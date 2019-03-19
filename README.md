@@ -46,4 +46,4 @@ Dans ce cadre:
 
 ## Solution
 
-Le script *user.py* que vous retrouverez dans mon dépôt [github](https://github.com/svcrobotics/Gestion-Utilisateurs/blob/master/user.py) effectue automatiquement toutes ces opérations.
+Le script *utilisateurs.py* que vous retrouverez dans mon dépôt [github](https://github.com/svcrobotics/Gestion-Utilisateurs/blob/master/utilisateurs.py) effectue automatiquement toutes ces opérations.
