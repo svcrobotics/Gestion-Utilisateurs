@@ -393,6 +393,7 @@ def archiver_user():
     if groupe == "-":
         backup_dir = "/archives/"
         targz = user + "-" + date + ".tar.gz"
+
         os.system("cd " + path_du_groupe + " && tar -czvf " + backup_dir + targz + " " + user + "/")
         os.system("rm -R " + user_path)
 
@@ -484,10 +485,10 @@ if __name__ == '__main__':
     
     print("#####  /etc/passwd  #################")
     os.system("tail -n 6 /etc/passwd")
-    print("#####  /etc/shadow  #################")
-    os.system("tail -n 6 /etc/shadow")
-    print("#####  /etc/group  ####################")
-    os.system("tail -n 8 /etc/group")
+    #print("#####  /etc/shadow  #################")
+    #os.system("tail -n 6 /etc/shadow")
+    #print("#####  /etc/group  ####################")
+    #os.system("tail -n 8 /etc/group")
     print("#####  /home/*/*  #######################")
     os.system("ls -al /home/*/*")
     print("#####  /archives/  ####################")
