@@ -367,42 +367,15 @@ def edit_user():
 
     if groupe == "-":
         try:
-            user_actif()
             deplacer_user()
             archiver_user()
             detruire_user()
         except FileExistsError:
             print("L'utilisateur a déjà été archiver.")
     else:
-        user_actif()
         deplacer_user()
 
     return 0
-
-def user_actif():
-    """La fonction user_actif() permet de savoir quels sont les utilisateurs logger sur le serveur.
-
-    """
-    global user
-    global user_connecté
-
-    os.system("users > /users.txt")
-
-    f = open("/users.txt", "r")
-    for line in f.readlines():
-        liste = line.split()
-        
-        try:
-            liste.index(user)
-            user_connecté = True
-        except ValueError:
-            user_connecté = False
-            return -1
-
-    f.close()
-
-    return user_connecté
-    
 
 def archiver_user():
     """La fonction archiver_user() crée en premier lieu une archive au format gzip de l'utilisateur
@@ -464,13 +437,8 @@ def deplacer_user():
     global path_csv
     global user
     global groupe
-    global user_connecté
 
     print("#######################################")
-
-    if user_connecté == True:
-        print(user + " est toujours logger sur le système, vous devez fermer sa session!")
-        sys.exit(0)
 
     if user_path != "" and (user_path != path_csv):
         os.system("cp -R " + user_path + " " + path_du_groupe)
@@ -501,7 +469,6 @@ if __name__ == '__main__':
     user_path_exist = False
     user_path = ""
     line =""
-    user_connecté = False
 
     try:
         os.system("touch /deleted_user_file.txt")
@@ -515,13 +482,13 @@ if __name__ == '__main__':
 
     prerequis()
     run()
-
+    
     print("#####  /etc/passwd  #################")
     os.system("tail -n 6 /etc/passwd")
     #print("#####  /etc/shadow  #################")
     #os.system("tail -n 6 /etc/shadow")
-    print("#####  /etc/group  ####################")
-    os.system("tail -n 8 /etc/group")
+    #print("#####  /etc/group  ####################")
+    #os.system("tail -n 8 /etc/group")
     print("#####  /home/*/*  #######################")
     os.system("ls -al /home/*/*")
     print("#####  /archives/  ####################")

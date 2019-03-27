@@ -1,0 +1,1 @@
+jmtlg_pl :2       :2               22:29   ?xdm?  34.16s  0.01s /usr/lib/gdm3/gdm-x-session --run-script /usr/bin/gnome-session
